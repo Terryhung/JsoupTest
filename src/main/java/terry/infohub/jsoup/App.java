@@ -7,8 +7,11 @@ import org.jsoup.select.Elements;
 import org.jsoup.safety.Whitelist;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 import org.codehaus.jackson.map.ObjectMapper;
 import java.net.*;
+import java.nio.file.*;
 
 /**
  * Hello world!
@@ -42,28 +45,38 @@ public class App
         System.out.println( doc );
     }
 
-    public static String ParsingHost() throws Exception {
-        String url = "http://www.cna.com.tw/news/aloc/201710030325-1.aspx";
-        URL aURL = new URL(url);
-        String host = aURL.getHost();
-        return host;
+    public static void CreateHTML(List<String> content) throws Exception {
+        Path file = Paths.get("Jsoup_test.html");
+        Files.write(file, content);
+    }
+
+    public static void AddDocHead(Elements doc) throws Exception {
+        Element head = doc.first();
+        head.prepend("<style>.article-header{content: '';background: linear-gradient(to top, #000 1rem,#fff 40rem,#fff 100%);height: 35rem;display: block;}.main-image{width: 100%;max-height: 500px;opacity: 0.9}.article-content{background-color: #fff;position: absolute;width: 90%;z-index: 1;margin: 0 4rem;margin-top: -5rem;font-size: 50px;}.article-header:after {content: '';background: #000;background: -moz-linear-gradient(top, #000 28%, #fff 58%, #fff 100%);background: -webkit-linear-gradient(top, #000 22rem,#fff 40rem,#fff 100%);background: linear-gradient(to bottom, #000 22rem,#fff 40rem,#fff 100%);height: 40rem;display: block;}</style>");
     }
 
     public static void Parsing() throws Exception {
         String url = "http://www.cna.com.tw/news/aloc/201710030325-1.aspx";
-        String image_url = "http://img5.cna.com.tw/www/WebPhotos/800/20171003/22066085.jpg";
         Document doc = Jsoup.connect(url)
             .header("User-Agent", "Mozilla/5.0 (Linux; Android 7.0; SAMSUNG SM-G950U Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/5.2 Chrome/51.0.2704.106 Mobile Safari/537.36")
             .get();
-        String title = doc.title();
-        Elements divs = doc.select("div.news_article");
-        Elements removed = doc.select("script, button");
+
+        String target = "div.news_article";
+        Elements divs = doc.select(target);
+        String remove = "script, button";
+        Elements removed = doc.select(remove);
 
         removed.remove();
-        Element div = divs.first().prependElement("div").attr("style", "position: relative; width:100%; height: 200px");
-        div.appendElement("img").attr("src", image_url);
-        div.appendElement("h1").attr("style", "position: absolute; top: 200px; left: 0px; width:100%").text("title");
 
-        System.out.println( divs );
+        String image_url = "http://img5.cna.com.tw/www/WebPhotos/800/20171003/22066085.jpg";
+        String news_title = "苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業";
+
+        divs.first().prependElement("h1").attr("style", "position: absolute; top: 400px; left: 0px; width:100%; font-size:50px; word-break: break-all").text(news_title);
+        Element child_divs = divs.first();
+        child_divs.wrap("<div class='article-content'></div>");
+        divs.first().children().first().before(String.format("<div class='article-header'><img src='%s' class='main-image'></div></div>", image_url));
+
+        AddDocHead(divs);
+        CreateHTML(Arrays.asList(divs.html()));
     }
 }
