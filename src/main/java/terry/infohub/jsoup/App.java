@@ -52,7 +52,7 @@ public class App
 
     public static void AddDocHead(Elements doc) throws Exception {
         Element head = doc.first();
-        head.prepend("<style>.article-header{content: '';background: linear-gradient(to top, #000 1rem,#fff 40rem,#fff 100%);height: 35rem;display: block;}.main-image{width: 100%;max-height: 500px;opacity: 0.9}.article-content{background-color: #fff;position: absolute;width: 90%;z-index: 1;margin: 0 4rem;margin-top: -5rem;font-size: 50px;}.article-header:after {content: '';background: #000;background: -moz-linear-gradient(top, #000 28%, #fff 58%, #fff 100%);background: -webkit-linear-gradient(top, #000 22rem,#fff 40rem,#fff 100%);background: linear-gradient(to bottom, #000 22rem,#fff 40rem,#fff 100%);height: 40rem;display: block;}</style>");
+        head.prepend("<style>.article-header{content: '';background: linear-gradient(to top, #000 1rem,#fff 40rem,#fff 100%);height: 35rem;display: block;}.main-image{width: 100%;max-height: 700px;opacty: 0.9}.article-content{background-color: #fff;position: absolute;width: 90%;z-index: 1;margin-left: 4%; margin-right: 5%;margin-top: -2rem;font-size: 25px; padding-left: 5px; padding-right: 5px}.article-header:after {content: '';background: #000;background: -moz-linear-gradient(top, #000 28%, #fff 58%, #fff 100%);background: -webkit-linear-gradient(top, #000 22rem,#fff 40rem,#fff 100%);background: linear-gradient(to bottom, #000 22rem,#fff 40rem,#fff 100%);height: 40rem;display: block;} .article-content > img{width: 100%}</style>");
     }
 
     public static void Parsing() throws Exception {
@@ -65,16 +65,18 @@ public class App
         Elements divs = doc.select(target);
         String remove = "script, button";
         Elements removed = doc.select(remove);
-
+        String image_url = "http://img.appledaily.com.tw/images/twapple/640pix/20170925/BN02/BN02_005.jpg";
+        String news_title = "苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業";
         removed.remove();
 
-        String image_url = "http://img5.cna.com.tw/www/WebPhotos/800/20171003/22066085.jpg";
-        String news_title = "苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業苗栗縣鼓勵青年創業";
+        /* Add Title to first position*/
+        divs.first().prependElement("h2").text(news_title);
 
-        divs.first().prependElement("h1").attr("style", "position: absolute; top: 400px; left: 0px; width:100%; font-size:50px; word-break: break-all").text(news_title);
-        Element child_divs = divs.first();
-        child_divs.wrap("<div class='article-content'></div>");
-        divs.first().children().first().before(String.format("<div class='article-header'><img src='%s' class='main-image'></div></div>", image_url));
+        /*Wrap New Tag*/
+        String child_html = divs.html();
+        divs.html(String.format("<div class='article-content'>%s<div>", child_html));
+        System.out.println(divs);
+        divs.prepend(String.format("<div class='article-header'><img src='%s' class='main-image'></div></div>", image_url));
 
         AddDocHead(divs);
         CreateHTML(Arrays.asList(divs.html()));
